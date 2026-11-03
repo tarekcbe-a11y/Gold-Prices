@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أسعار الذهب - جروب عملاء البنوك المصرية</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0c1017;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .card {
+            background: linear-gradient(180deg, #0d1b2a 0%, #07111e 100%);
+            border: 2px solid #d4af37;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 420px;
+            padding: 24px 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #e5ca72;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .date-str {
+            font-size: 14px;
+            color: #8da4c4;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .box {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            border-radius: 10px;
+            padding: 14px 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .full-width {
+            margin-bottom: 12px;
+        }
+
+        .label {
+            font-size: 15px;
+            color: #e5ca72;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .divider {
+            height: 1px;
+            background: rgba(212, 175, 55, 0.3);
+            margin: 18px 0 14px 0;
+        }
+
+        .sub-footer {
+            font-size: 13px;
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        .author {
+            font-size: 16px;
+            color: #e5ca72;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="header-title">جروب عملاء البنوك المصرية</div>
+        <div class="date-str" id="today-date">--</div>
+
+        <div class="grid-container">
+            <div class="box">
+                <div class="label">عيار 21</div>
+                <div class="value" id="gold-21">--- جنيه</div>
+            </div>
+            <div class="box">
+                <div class="label">عيار 24</div>
+                <div class="value" id="gold-24">--- جنيه</div>
+            </div>
+            <div class="box">
+                <div class="label">عيار 14</div>
+                <div class="value" id="gold-14">--- جنيه</div>
+            </div>
+            <div class="box">
+                <div class="label">عيار 18</div>
+                <div class="value" id="gold-18">--- جنيه</div>
+            </div>
+        </div>
+
+        <div class="box full-width">
+            <div class="label">سعر الجنيه الذهب</div>
+            <div class="value" id="gold-coin">--- جنيه</div>
+        </div>
+
+        <div class="box full-width">
+            <div class="label">أوقية الذهب</div>
+            <div class="value" id="gold-ounce">--- جنيه</div>
+        </div>
+
+        <div class="sub-footer">Follow Egyptian Bank Clients Group</div>
+        <div class="divider"></div>
+        <div class="author">إعداد أ/ طارق متولي</div>
+    </div>
+
+    <script>
+        // إظهار تاريخ اليوم تلقائياً
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const yyyy = today.getFullYear();
+        document.getElementById('today-date').innerText = `${dd}-${mm}-${yyyy}`;
+
+        // الرابط المباشر لشيت جوجل الخاص بك بصيغة CSV لتحديث البيانات فوراً
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/1jGuWDQQgfJmbmIMcG3b--20-IUCEVlFQjbMp0rxv3do/export?format=csv';
+
+        function formatNumber(numStr) {
+            if (!numStr) return '---';
+            const cleanNum = numStr.toString().replace(/,/g, '').trim();
+            const parsed = parseFloat(cleanNum);
+            if (isNaN(parsed)) return numStr;
+            return parsed.toLocaleString('en-US');
+        }
+
+        async function fetchPrices() {
+            try {
+                const response = await fetch(csvUrl);
+                const data = await response.text();
+                const rows = data.split('\n').map(row => row.split(','));
+                
+                // قراءة البيانات بالترتيب المطابق لجدولك (الصف الأول للثاني عشر)
+                if(rows[0] && rows[0][1]) document.getElementById('gold-24').innerText = `${formatNumber(rows[0][1])} جنيه`;
+                if(rows[1] && rows[1][1]) document.getElementById('gold-21').innerText = `${formatNumber(rows[1][1])} جنيه`;
+                if(rows[2] && rows[2][1]) document.getElementById('gold-18').innerText = `${formatNumber(rows[2][1])} جنيه`;
+                if(rows[3] && rows[3][1]) document.getElementById('gold-14').innerText = `${formatNumber(rows[3][1])} جنيه`;
+                if(rows[4] && rows[4][1]) document.getElementById('gold-coin').innerText = `${formatNumber(rows[4][1])} جنيه`;
+                if(rows[5] && rows[5][1]) document.getElementById('gold-ounce').innerText = `${formatNumber(rows[5][1])} جنيه`;
+
+            } catch (error) {
+                console.error('خطأ في جلب البيانات من جدول جوجل:', error);
+            }
+        }
+
+        fetchPrices();
+    </script>
+</body>
+</html>
