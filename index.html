@@ -87,7 +87,7 @@
             height: 1px;
             background: rgba(212, 175, 55, 0.3);
             margin: 18px 0 14px 0;
-        }
+            }
 
         .sub-footer {
             font-size: 13px;
@@ -145,42 +145,58 @@
     </div>
 
     <script>
-        // ضبط التاريخ التلقائي
+        // إظهار التاريخ التلقائي
         const today = new Date();
         const dd = String(today.getDate()).padStart(2, '0');
         const mm = String(today.getMonth() + 1).padStart(2, '0');
         const yyyy = today.getFullYear();
         document.getElementById('today-date').innerText = `${dd}-${mm}-${yyyy}`;
 
+        function cleanText(txt) {
+            if (!txt) return '';
+            return txt.replace(/"/g, '').trim();
+        }
+
         async function fetchPrices() {
             try {
-                // إضافة رقم عشوائي ووقت لمنع الـ Cache وجلب البيانات الحديثة فوراً من شيت جوجل
+                // منع التخزين المؤقت وجلب البيانات الحية المباشرة
                 const timestamp = new Date().getTime();
                 const csvUrl = `https://docs.google.com/spreadsheets/d/1jGuWDQQgfJmbmIMcG3b--20-IUCEVlFQjbMp0rxv3do/export?format=csv&t=${timestamp}`;
 
                 const response = await fetch(csvUrl, { cache: 'no-store' });
                 const data = await response.text();
-                const rows = data.split('\n').map(row => row.split(','));
                 
-                // قراءة البيانات بالترتيب المطابق لجدولك
-                if(rows[0] && rows[0][1]) document.getElementById('gold-24').innerText = `${rows[0][1].trim()} جنيه`;
-                if(rows[1] && rows[1][1]) document.getElementById('gold-21').innerText = `${rows[1][1].trim()} جنيه`;
-                if(rows[2] && rows[2][1]) document.getElementById('gold-18').innerText = `${rows[2][1].trim()} جنيه`;
-                if(rows[3] && rows[3][1]) document.getElementById('gold-14').innerText = `${rows[3][1].trim()} جنيه`;
-                if(rows[4] && rows[4][1]) document.getElementById('gold-coin').innerText = `${rows[4][1].trim()} جنيه`;
-                if(rows[5] && rows[5][1]) document.getElementById('gold-ounce').innerText = `${rows[5][1].trim()} جنيه`;
+                // تقسيم السطور بشكل صحيح
+                const rows = data.split(/\r?\n/);
+                
+                let prices = {};
 
-            } function (error) {
-                // في حال خطأ الاتصال
+                rows.forEach(row => {
+                    const cols = row.split(',');
+                    if (cols.length >= 2) {
+                        let key = cleanText(cols[0]);
+                        let val = cleanText(cols[1]);
+                        if (key && val) {
+                            prices[key] = val;
+                        }
+                    }
+                });
+
+                // مطابقة الأسماء الموجودة في جدولك بدقة
+                if(prices['عيار 24']) document.getElementById('gold-24').innerText = `${prices['عيار 24']} جنيه`;
+                if(prices['عيار 21']) document.getElementById('gold-21').innerText = `${prices['عيار 21']} جنيه`;
+                if(prices['عيار 18']) document.getElementById('gold-18').innerText = `${prices['عيار 18']} جنيه`;
+                if(prices['عيار 14']) document.getElementById('gold-14').innerText = `${prices['عيار 14']} جنيه`;
+                if(prices['الجنيه الذهب']) document.getElementById('gold-coin').innerText = `${prices['الجنيه الذهب']} جنيه`;
+                if(prices['الأوقية']) document.getElementById('gold-ounce').innerText = `${prices['الأوقية']} جنيه`;
+
             } catch (error) {
-                console.error('خطأ في التحديث:', error);
+                console.error('خطأ في جلب البيانات:', error);
             }
         }
 
-        // جلب الأسعار فور فتح الصفحة
+        // الجلب عند الفتح وتحديث تلقائي كل 30 ثانية بدون أي ريفريش
         fetchPrices();
-
-        // تحديث تلقائي في الخلفية كل 30 ثانية من غير أي ريفريش من العضو!
         setInterval(fetchPrices, 30000);
     </script>
 </body>
