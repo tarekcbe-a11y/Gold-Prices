@@ -87,7 +87,7 @@
             height: 1px;
             background: rgba(212, 175, 55, 0.3);
             margin: 18px 0 14px 0;
-            }
+        }
 
         .sub-footer {
             font-size: 13px;
@@ -113,30 +113,30 @@
         <div class="grid-container">
             <div class="box">
                 <div class="label">عيار 21</div>
-                <div class="value" id="gold-21">--- جنيه</div>
+                <div class="value" id="gold-21">جاري التحديث...</div>
             </div>
             <div class="box">
                 <div class="label">عيار 24</div>
-                <div class="value" id="gold-24">--- جنيه</div>
+                <div class="value" id="gold-24">جاري التحديث...</div>
             </div>
             <div class="box">
                 <div class="label">عيار 14</div>
-                <div class="value" id="gold-14">--- جنيه</div>
+                <div class="value" id="gold-14">جاري التحديث...</div>
             </div>
             <div class="box">
                 <div class="label">عيار 18</div>
-                <div class="value" id="gold-18">--- جنيه</div>
+                <div class="value" id="gold-18">جاري التحديث...</div>
             </div>
         </div>
 
         <div class="box full-width">
             <div class="label">سعر الجنيه الذهب</div>
-            <div class="value" id="gold-coin">--- جنيه</div>
+            <div class="value" id="gold-coin">جاري التحديث...</div>
         </div>
 
         <div class="box full-width">
             <div class="label">أوقية الذهب</div>
-            <div class="value" id="gold-ounce">--- جنيه</div>
+            <div class="value" id="gold-ounce">جاري التحديث...</div>
         </div>
 
         <div class="sub-footer">Follow Egyptian Bank Clients Group</div>
@@ -152,52 +152,36 @@
         const yyyy = today.getFullYear();
         document.getElementById('today-date').innerText = `${dd}-${mm}-${yyyy}`;
 
-        function cleanText(txt) {
-            if (!txt) return '';
-            return txt.replace(/"/g, '').trim();
-        }
-
         async function fetchPrices() {
             try {
-                // منع التخزين المؤقت وجلب البيانات الحية المباشرة
                 const timestamp = new Date().getTime();
-                const csvUrl = `https://docs.google.com/spreadsheets/d/1jGuWDQQgfJmbmIMcG3b--20-IUCEVlFQjbMp0rxv3do/export?format=csv&t=${timestamp}`;
+                // استخدام رابط تصدير مخصص يضمن استجابة سريعة ودقيقة للـ CSV
+                const csvUrl = `https://docs.google.com/spreadsheets/d/1jGuWDQQgfJmbmIMcG3b--20-IUCEVlFQjbMp0rxv3do/export?format=csv&id=1jGuWDQQgfJmbmIMcG3b--20-IUCEVlFQjbMp0rxv3do&gid=0&t=${timestamp}`;
 
-                const response = await fetch(csvUrl, { cache: 'no-store' });
+                const response = await fetch(csvUrl);
                 const data = await response.text();
                 
-                // تقسيم السطور بشكل صحيح
-                const rows = data.split(/\r?\n/);
+                const rows = data.split('\n').map(row => row.split(',').map(cell => cell.replace(/"/g, '').trim()));
                 
-                let prices = {};
-
-                rows.forEach(row => {
-                    const cols = row.split(',');
-                    if (cols.length >= 2) {
-                        let key = cleanText(cols[0]);
-                        let val = cleanText(cols[1]);
-                        if (key && val) {
-                            prices[key] = val;
-                        }
-                    }
-                });
-
-                // مطابقة الأسماء الموجودة في جدولك بدقة
-                if(prices['عيار 24']) document.getElementById('gold-24').innerText = `${prices['عيار 24']} جنيه`;
-                if(prices['عيار 21']) document.getElementById('gold-21').innerText = `${prices['عيار 21']} جنيه`;
-                if(prices['عيار 18']) document.getElementById('gold-18').innerText = `${prices['عيار 18']} جنيه`;
-                if(prices['عيار 14']) document.getElementById('gold-14').innerText = `${prices['عيار 14']} جنيه`;
-                if(prices['الجنيه الذهب']) document.getElementById('gold-coin').innerText = `${prices['الجنيه الذهب']} جنيه`;
-                if(prices['الأوقية']) document.getElementById('gold-ounce').innerText = `${prices['الأوقية']} جنيه`;
+                // ربط الصفوف مباشرة حسب ترتيب الجدول في الصورة (الصف الأول للثادس)
+                // صف 0: عيار 24 | صف 1: عيار 21 | صف 2: عيار 18 | صف 3: عيار 14 | صف 4: الجنيه | صف 5: الأوقية
+                if (rows.length >= 6) {
+                    if(rows[0][1]) document.getElementById('gold-24').innerText = `${rows[0][1]} جنيه`;
+                    if(rows[1][1]) document.getElementById('gold-21').innerText = `${rows[1][1]} جنيه`;
+                    if(rows[2][1]) document.getElementById('gold-18').innerText = `${rows[2][1]} جنيه`;
+                    if(rows[3][1]) document.getElementById('gold-14').innerText = `${rows[3][1]} جنيه`;
+                    if(rows[4][1]) document.getElementById('gold-coin').innerText = `${rows[4][1]} جنيه`;
+                    if(rows[5][1]) document.getElementById('gold-ounce').innerText = `${rows[5][1]} جنيه`;
+                }
 
             } catch (error) {
                 console.error('خطأ في جلب البيانات:', error);
             }
         }
 
-        // الجلب عند الفتح وتحديث تلقائي كل 30 ثانية بدون أي ريفريش
+        // جلب البيانات فوراً وتحديثها أوتوماتيك كل 15 ثانية في الخلفية
         fetchPrices();
-        setInterval(fetchPrices, 30000);
+        setInterval(fetchPrices, 15000);
     </script>
 </body>
 </html>
