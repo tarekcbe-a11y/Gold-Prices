@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>أسعار الذهب - جروب عملاء البنوك المصرية</title>
+    <title>Gold Prices</title>
     <style>
         * {
             box-sizing: border-box;
@@ -145,44 +145,43 @@
     </div>
 
     <script>
-        // إظهار تاريخ اليوم تلقائياً
+        // ضبط التاريخ التلقائي
         const today = new Date();
         const dd = String(today.getDate()).padStart(2, '0');
         const mm = String(today.getMonth() + 1).padStart(2, '0');
         const yyyy = today.getFullYear();
         document.getElementById('today-date').innerText = `${dd}-${mm}-${yyyy}`;
 
-        // الرابط المباشر لشيت جوجل الخاص بك بصيغة CSV لتحديث البيانات فوراً
-        const csvUrl = 'https://docs.google.com/spreadsheets/d/1jGuWDQQgfJmbmIMcG3b--20-IUCEVlFQjbMp0rxv3do/export?format=csv';
-
-        function formatNumber(numStr) {
-            if (!numStr) return '---';
-            const cleanNum = numStr.toString().replace(/,/g, '').trim();
-            const parsed = parseFloat(cleanNum);
-            if (isNaN(parsed)) return numStr;
-            return parsed.toLocaleString('en-US');
-        }
-
         async function fetchPrices() {
             try {
-                const response = await fetch(csvUrl);
+                // إضافة رقم عشوائي ووقت لمنع الـ Cache وجلب البيانات الحديثة فوراً من شيت جوجل
+                const timestamp = new Date().getTime();
+                const csvUrl = `https://docs.google.com/spreadsheets/d/1jGuWDQQgfJmbmIMcG3b--20-IUCEVlFQjbMp0rxv3do/export?format=csv&t=${timestamp}`;
+
+                const response = await fetch(csvUrl, { cache: 'no-store' });
                 const data = await response.text();
                 const rows = data.split('\n').map(row => row.split(','));
                 
-                // قراءة البيانات بالترتيب المطابق لجدولك (الصف الأول للثاني عشر)
-                if(rows[0] && rows[0][1]) document.getElementById('gold-24').innerText = `${formatNumber(rows[0][1])} جنيه`;
-                if(rows[1] && rows[1][1]) document.getElementById('gold-21').innerText = `${formatNumber(rows[1][1])} جنيه`;
-                if(rows[2] && rows[2][1]) document.getElementById('gold-18').innerText = `${formatNumber(rows[2][1])} جنيه`;
-                if(rows[3] && rows[3][1]) document.getElementById('gold-14').innerText = `${formatNumber(rows[3][1])} جنيه`;
-                if(rows[4] && rows[4][1]) document.getElementById('gold-coin').innerText = `${formatNumber(rows[4][1])} جنيه`;
-                if(rows[5] && rows[5][1]) document.getElementById('gold-ounce').innerText = `${formatNumber(rows[5][1])} جنيه`;
+                // قراءة البيانات بالترتيب المطابق لجدولك
+                if(rows[0] && rows[0][1]) document.getElementById('gold-24').innerText = `${rows[0][1].trim()} جنيه`;
+                if(rows[1] && rows[1][1]) document.getElementById('gold-21').innerText = `${rows[1][1].trim()} جنيه`;
+                if(rows[2] && rows[2][1]) document.getElementById('gold-18').innerText = `${rows[2][1].trim()} جنيه`;
+                if(rows[3] && rows[3][1]) document.getElementById('gold-14').innerText = `${rows[3][1].trim()} جنيه`;
+                if(rows[4] && rows[4][1]) document.getElementById('gold-coin').innerText = `${rows[4][1].trim()} جنيه`;
+                if(rows[5] && rows[5][1]) document.getElementById('gold-ounce').innerText = `${rows[5][1].trim()} جنيه`;
 
+            } function (error) {
+                // في حال خطأ الاتصال
             } catch (error) {
-                console.error('خطأ في جلب البيانات من جدول جوجل:', error);
+                console.error('خطأ في التحديث:', error);
             }
         }
 
+        // جلب الأسعار فور فتح الصفحة
         fetchPrices();
+
+        // تحديث تلقائي في الخلفية كل 30 ثانية من غير أي ريفريش من العضو!
+        setInterval(fetchPrices, 30000);
     </script>
 </body>
 </html>
